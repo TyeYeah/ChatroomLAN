@@ -1,8 +1,11 @@
 # ChatroomLAN
 ## Why This Garbage
 At first, it's the product of my OOP practice course, and the interface you can see now was according to teachers' demmands.
+
 Now I take it out because It is the only project these years I've made since I learned to code, which is not a completely rubbish.
+
 Besides, it's like a little toy that me and my friends can have fun with.
+
 But im not gonna be a professional JAVA developer, so 'Thread' or other advanced tech hasn't been properly used.
 ## Project Structure
 |
@@ -21,10 +24,10 @@ But im not gonna be a professional JAVA developer, so 'Thread' or other advanced
 java -jar servercmd.jar 
 # servergui.jar provide gui mode
 ```
-Server's IP address will show in cmd(or gui)
+-- Server's IP address will show in cmd(or gui)
 ```bash
 #then start the client
 java -jar client.jar
 ```
-input server's IP(server should be on) and your favourate nickname,then you can enter chatroom
+-- input server's IP(server should be on) and your favourate nickname,then you can enter chatroom
 - compile and run by yourself
