@@ -23,11 +23,10 @@ But im not gonna be a professional JAVA developer, so 'Thread' or other advanced
 # start server first
 java -jar servercmd.jar 
 # servergui.jar provide gui mode
-```
- Server's IP address will show in cmd(or gui)
-```bash
+# Server's IP address will show in cmd(or gui)
+
 #then start the client
 java -jar client.jar
+# input server's IP(server should be on) and your favourate nickname,then you can enter chatroom
 ```
- input server's IP(server should be on) and your favourate nickname,then you can enter chatroom
 - compile and run by yourself
