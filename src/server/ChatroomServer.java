@@ -24,11 +24,14 @@ public class ChatroomServer extends ServerSocket {
 	static List<String> userList = new CopyOnWriteArrayList<String>();// user list
 	private static List<Task> threadList = new ArrayList<Task>(); // list for every client (used for msg)
 	private static List<Task2> threadList2 = new ArrayList<Task2>(); // list for every client(used to update user list)
+	private static List<Task3> threadList3 = new ArrayList<Task3>(); // list for every client(to prevent one little bug)
 	private static BlockingQueue<String> msgQueue = new ArrayBlockingQueue<String>(20); // msg queue
 	private static BlockingQueue<String> msgQueueq = new ArrayBlockingQueue<String>(20); // user list queue
 	
 	ServerSocket ssss;//receive msg from port 3301
+	ServerSocket ssss2;//receive msg from port 3302
 	Socket sss;//send to pc on port 3301
+	Socket sss2;//send to pc on port 3302
 	String to; //identify whom to send
 	public ChatroomServer() throws Exception {
 		
@@ -47,6 +50,7 @@ public class ChatroomServer extends ServerSocket {
 		new Thread(new PushMsgTask()).start(); // start msg sending 
 		new Thread(new PushMsgTaskq()).start(); // start list updating 
 		ssss=new ServerSocket(SERVER_PORT+1);
+		ssss2=new ServerSocket(SERVER_PORT+2);
 		
 		while (true) {
 			// server accepting
@@ -55,6 +59,7 @@ public class ChatroomServer extends ServerSocket {
 			// use a new thread to cope with every connection
 			new Thread(new Task(socket)).start();
 			new Thread(new Task2(ssss.accept())).start();
+			new Thread(new Task3(ssss2.accept())).start();
 		}
 	}
 	
@@ -157,7 +162,7 @@ public class ChatroomServer extends ServerSocket {
 			userList.add(this.userName);
 			threadList.add(this);
 			
-			pushMsg("【" + this.userName + " entered 】");
+			pushMsg("{" + this.userName + " entered }");
 			//System.out.println("Form Cliect[port:" + userName + "] "+ this.userName + " entered ");
 		}
  
@@ -180,7 +185,7 @@ public class ChatroomServer extends ServerSocket {
 								sendMsg(END_MARK);
 								break;
 							} else {
-								pushMsgq(String.format("Whisper：%1$s speaks to %2$s：%3$s", userName,to, msg)+"\n"+to+"\n"+userName);
+								pushMsgq(String.format("Whisper:%1$s speaks to %2$s:%3$s", userName,to, msg)+"\n"+to+"\n"+userName);
 							}
 							
 						}else{
@@ -188,7 +193,7 @@ public class ChatroomServer extends ServerSocket {
 								sendMsg(END_MARK);
 								break;
 							} else {
-								pushMsg(String.format("%1$s speaks ：%2$s", userName, msg));
+								pushMsg(String.format("%1$s speaks :%2$s", userName, msg));
 							}
 						}
 					}
@@ -199,14 +204,14 @@ public class ChatroomServer extends ServerSocket {
 							sendMsg(END_MARK);
 							break;
 						} else {
-							pushMsg(String.format("%1$s speaks ：%2$s", userName, msg));
+							pushMsg(String.format("%1$s speaks :%2$s", userName, msg));
 						}
 					}else{
 						if (END_MARK.equals(msg)) { 
 							sendMsg(END_MARK);
 							break;
 						} else {
-							pushMsg(String.format("%1$s speaks to %2$s：%3$s", userName, to,msg));
+							pushMsg(String.format("%1$s speaks to %2$s:%3$s", userName, to,msg));
 						}
 					}
 					
@@ -231,7 +236,7 @@ public class ChatroomServer extends ServerSocket {
 				}
 				userList.remove(userName);
 				threadList.remove(this);
-				pushMsg("【" + userName + " exit the room 】");
+				pushMsg("{" + userName + " exit the room }");
 				//System.out.println("Form Cliect[port:" + socket.getPort() + "] "+ userName + " exit the room ");
 			}
 		}
@@ -383,6 +388,98 @@ public class ChatroomServer extends ServerSocket {
 
 	}
 
+	/*
+	  this thread used for updating list
+	 */
+	class Task3 implements Runnable {
+
+		private Socket socket;
+
+		private BufferedReader buff;
+
+		private Writer writer;
+
+
+		/*
+		  constructor
+		 */
+		public Task3(Socket socket) {
+			this.socket = socket;
+			
+			try {
+				this.buff = new BufferedReader(new InputStreamReader(
+						socket.getInputStream(), "UTF-8"));
+				this.writer = new OutputStreamWriter(socket.getOutputStream(),
+						"UTF-8");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			threadList3.add(this);
+			sendMsg("clean");
+			sendMsg(onlineUsers());
+			
+		}
+
+		@Override
+		public void run() {
+			try {
+				while (true) {
+					String msg = buff.readLine();
+					
+					
+					if (END_MARK.equals(msg)) { // 
+						sendMsg(END_MARK);
+						break;
+					} else {
+						sendMsg("clean");
+						sendMsg(onlineUsers());  
+						
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally { // 
+				try {
+					writer.close();
+					buff.close();
+					socket.close();
+				} catch (Exception e) {
+
+				}
+				
+				threadList2.remove(this);
+				
+			}
+		}
+
+		
+
+		private void sendMsg(String msg) {
+			try {
+				writer.write(msg);
+				writer.write("\015\012");
+				writer.flush();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+	    /*
+	     list users
+	     */
+
+		private String onlineUsers() {
+			String sbf ="";
+			sbf+="=Online Users("+userList.size()+")= ";
+			for (int i = 0; i < userList.size(); i++) {
+				sbf+= "\n"+userList.get(i) ;
+			}
+			//sbf.append("===============================");
+			return sbf;
+		}
+
+	}
 
 	
 	
