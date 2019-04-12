@@ -4,9 +4,9 @@ At first, it's the product of my OOP practice course, and the interface you can 
 
 Now I take it out because It is the only project in these years I've made since I learned to code, which is not a completely rubbish.
 
-Besides, it's like a little toy that me and my friends can have fun with.
+Besides, it's like a little toy that me and my friends can have fun with. And I am not looking forward someone to reading it, because I reviewed it for three nights, and all fixes aren't elegant writeen at all.
 
-But im not gonna be a professional JAVA developer, so 'Thread' or other advanced tech hasn't been properly used.
+Meanwhile im not gonna be a professional JAVA developer, so 'Thread' or other advanced tech hasn't been properly used.
 ## Project Structure
 ```bash
 |
