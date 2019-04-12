@@ -37,6 +37,9 @@ java -jar client.jar
 
 ## Features
 When you're in the main chatroom, you can see messages on the left and user list on the right
+
 You can just type one-line message, because when you type 'Enter' the message will be sent
+
 Users can speak to all or speak to someone only, but all of them will be seen by others.
+
 If You want to speak to someone privately, remember to use whisper mode
