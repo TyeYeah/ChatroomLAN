@@ -60,12 +60,14 @@ public class ChatroomWindow extends JFrame {
  
     private Writer writer;//used for interact with port 3000
     private Writer writer2;//used for port 3001
+    private Writer writer3;//used for port 3002
  
     //message sending stream
     private BufferedReader in;
 	
-	Socket ss;//update user list
-	Socket sss;//message sending and showing
+	Socket ss;//message sending and showing
+	Socket sss;//update user list
+	Socket sss2;//prevent bug in choosing whom to talk :(
 	String who;//identify whom to talk
 	
 	
@@ -165,15 +167,18 @@ public class ChatroomWindow extends JFrame {
 		SERVER_IP=ip;uname=id;
 		
 		sss=new Socket(SERVER_IP,SERVER_PORT+1);
+		sss2=new Socket(SERVER_IP,SERVER_PORT+2);
 		
 		ss=new Socket(SERVER_IP,SERVER_PORT);
 		client=ss;
 	
     writer = new OutputStreamWriter(ss.getOutputStream(), "UTF-8");
     writer2 = new OutputStreamWriter(sss.getOutputStream(), "UTF-8");
+    writer3 = new OutputStreamWriter(sss2.getOutputStream(), "UTF-8");
     
     new Thread(new ReceiveMsgTask()).start(); // start message receiving
     new Thread(new ReceiveUserList()).start(); // start user list listening
+    new Thread(new ReceiveUserList2()).start(); // start user list listening
     
     
     writer.write(uname);//send id to server side ( add user to the user list )
@@ -224,9 +229,9 @@ public class ChatroomWindow extends JFrame {
 		            
 		            
 		            }
-		            writer2.write(inputMsg);
-		            writer2.write("\n");
-		            writer2.flush(); 
+		            writer3.write(inputMsg);
+		            writer3.write("\n");
+		            writer3.flush(); 
 		            //3 lines above used to update user list
 				
 				} catch (IOException e1) {
@@ -305,14 +310,13 @@ public class ChatroomWindow extends JFrame {
                     }else if("clean".equals(result)){ // 
                         
                         userList.setText("");
-                        comboBox.setModel(new DefaultComboBoxModel(new String[] {"select whom to talk"}));
-                        comboBox.addItem("all");
+                        
                     } 
                     else { // 
                        // System.out.println(result);
                         userList.append("\n"+result);
                         if(!result.substring(0, 1).equals("=")){
-                        comboBox.addItem(result);
+                        
                     }
                     }
  
@@ -334,5 +338,51 @@ public class ChatroomWindow extends JFrame {
 
             }
         }
+	//thread to prevent bug in choosing whom to talk
+	class ReceiveUserList2 implements Runnable {
+	 
+    private BufferedReader buff;
+
+    @Override
+    public void run() {
+        
+            try {
+            	
+				this.buff = new BufferedReader(new InputStreamReader(sss2.getInputStream(), "UTF-8"));
+			while (true) {
+				String result = buff.readLine();
+                if (END_MARK.equals(result)) { // exit when encounter 'quit'
+                    
+                    break;
+                }else if("clean".equals(result)){ // 
+                    
+                    comboBox.setModel(new DefaultComboBoxModel(new String[] {"select whom to talk"}));
+                    comboBox.addItem("all");
+                } 
+                else { // 
+                	
+                    if(!result.substring(0, 1).equals("=")){
+                    comboBox.addItem(result);
+                }
+                }
+
+			}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}finally {
+                try {
+                    buff.close();
+                    writer3.close();
+                    sss2.close();
+                    in.close();
+                } catch (Exception e) {
+ 
+                }
+                
+                System.exit(0);
+            }
+
+        }
+    }
 }
  
