@@ -102,7 +102,7 @@ public class ChatroomWindow extends JFrame {
 	 * @throws UnknownHostException 
 	 */
 	public ChatroomWindow(String ip,String id) throws UnknownHostException, IOException {
-		setTitle("ChatroomLAN");
+		setTitle("ChatroomLAN @user:"+id);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
